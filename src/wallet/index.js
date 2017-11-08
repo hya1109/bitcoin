@@ -1,6 +1,7 @@
 import { ajax, $, BASE_URL } from '../js/util'
 import pop from '../js/pop'
-import '../css/page.less'
+import '../css/reset.css'
+import './index.less'
 
 const clipboard = new window.Clipboard('.js-copy')
 
@@ -16,22 +17,18 @@ clipboard.on('error', () => {
 ajax({
   url: `${BASE_URL}/api/account/info`,
   success(data) {
-    console.log(data)
     render(data.data)
   }
 })
 
 function render(data) {
-  $('.js-wallet').innerHTML = `
-    <div class="form-group">
-      总资产：${(data.balance + data.freeze).toFixed(0)}
-    </div>
-    <div class="form-group">
-      可用资产：${data.balance}
-    </div>
-    <div class="form-group">
-      冻结资产：${data.freeze}
-    </div>
-  `
-  $('.js-address').value = data.address
+  $('.total span').innerHTML = `&#579;${(data.balance + data.freeze).toFixed(8).slice(0, 13)}`
+  $('.usable span').innerHTML = `&#579;${data.balance.toFixed(8).slice(0, 13)}`
+  $('.unusable span').innerHTML = `&#579;${data.freeze.toFixed(8)}`
+  $('.js-addr').textContent = data.address
+  new window.QRCode($('.qrcode'), {
+    text: data.address,
+    width: 180,
+    height: 180
+  })
 }

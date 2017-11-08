@@ -1,6 +1,7 @@
 import { ajax, $, localParam, timer, redirect, setUserInfo, getUserInfo, BASE_URL, openTab } from '../js/util'
 import pop from '../js/pop'
 import '../css/page.less'
+import './index.less'
 
 const { search } = localParam()
 const userInfo = getUserInfo()
@@ -102,7 +103,7 @@ if (!userInfo.hasFundPwd) {
     })
   }, false)
   const codeBtn = $('.js-code-btn')
-  const startTimer = timer(10, (time) => {
+  const startTimer = timer(60, (time) => {
     codeBtn.textContent = `${time}秒后重发`
   }, () => {
     codeBtn.disabled = false
@@ -118,7 +119,7 @@ if (!userInfo.hasFundPwd) {
       url: `${BASE_URL}/api/user/send_code`,
       method: 'POST',
       needToken: false,
-      data: { phone, type: 1 },
+      data: { phone, type: 2 },
       success(data) {
         if (data.code === 0) {
           pop.success('发送成功')
