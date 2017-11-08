@@ -1,4 +1,11 @@
-export const BASE_URL = 'http://47.95.234.100:8081'
+// export const BASE_URL = 'http://116.206.176.112'
+export const BASE_URL = (() => {
+  if (window.location.host.indexOf('localhost') >= 0) {
+    // return 'http://47.95.234.100:8081'
+    return 'http://116.206.176.112'
+  }
+  return ''
+})()
 
 const isApp = (/bitcoin/i).test(navigator.userAgent)
 
@@ -29,9 +36,10 @@ export function ajax({
   error = () => {}
 }) {
   let body = Object.keys(data)
+    .filter(key => data[key] !== '')
     .map(key => `${key}=${data[key]}`)
     .join('&')
-  const token = localStorage.getItem('token')
+  const token = getToken()
   let URL = url
   if (needToken && !token) {
     redirect('./login.html', '登录')
@@ -107,7 +115,8 @@ export function setUserInfo(userInfo) {
 }
 
 export function checkPassword(callback = () => {}) {
-  const { hasFundPwd, token } = getUserInfo()
+  const token = getToken()
+  const { hasFundPwd } = getUserInfo()
   if (!token) {
     redirect('./login.html', '登录')
     return
@@ -133,23 +142,25 @@ export function checkPassword(callback = () => {}) {
 
 export function redirect(href, title) {
   if (isApp) {
-    console.log('redirect in app')
     window.location.href = `bitcoin://open?title=${encodeURIComponent(title)}&url=${encodeURIComponent(href)}`
   } else {
     window.location.href = href
   }
 }
 
-export function openTab(index) {
+export function openTab(index, url = '') {
   if (isApp) {
-    window.location.href = `bitcoin://openTab/${index}`
+    const schema = `bitcoin://openTab/${index}`
+    console.log(url ? `${schema}?url=${encodeURIComponent(url)}` : schema)
+    window.location.href = url ? `${schema}?url=${encodeURIComponent(url)}` : schema
   } else {
     window.location.href = './market.html'
   }
 }
 
-export const PAY_TYPE = ['', '支付宝', '银行转账']
-export const ORDER_STATUS = ['初始化', '待付款', '交易成功', '订单取消']
+export const PAY_TYPE = ['', '支付宝', '银行转账', '微信支付']
+export const ORDER_STATUS = ['待付款', '已付款', '交易成功', '已取消']
+export const ORDER_TYPE = ['', '购买', '出售']
 
 export function timeFormat(time) {
   const date = new Date(time)

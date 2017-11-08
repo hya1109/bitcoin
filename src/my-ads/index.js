@@ -7,6 +7,8 @@ let PAGE = 1
 let STATUS = 1
 const TYPE = localParam().search.type || 2
 
+loadList(TYPE, STATUS, 1)
+
 $('.js-tab').addEventListener('click', (e) => {
   if (!e.target.classList.contains('item')) return
   if (e.target.classList.contains('active')) return
@@ -38,7 +40,7 @@ function loadList(type, status, page = 1, pageSize = 15) {
     $('.js-list').innerHTML = '加载中...'
   }
   ajax({
-    url: `${BASE_URL}/api/ads/list`,
+    url: `${BASE_URL}/api/ads/user/list`,
     data: {
       adsType: type,
       adsStatus: status,
@@ -68,23 +70,23 @@ function loadList(type, status, page = 1, pageSize = 15) {
 function renderList(list) {
   let html = ''
   if (!list.length) {
-    html = '暂无数据'
+    html = '<div style="text-align: center;">暂无数据</div>'
   } else {
     html = list.map((item) => {
       return `
         <div class="item" data-id="${item.id}">
           <div class="line-1 d-flex justify-content-between">
-            <span class="text-dark">
+            <span class="text-dark name">
               ${item.userName}
               <span class="badge badge-success">${PAY_TYPE[item.payType]}</span>
             </span>  
-            <span class="text-success">${item.price} CNY</span>
+            <span class="amount">${item.price} <i class="text-secondary">RMB</i></span>
           </div>
-          <div class="line-2 text-secondary">限额：${item.minLimitPrice} - ${item.maxLimitPrice} CNY</div>
+          <div class="line-2 text-secondary">交易  ${item.tradeCount || 0}   |  信任  ${item.creditScore || 0}</div>
+          <div class="line-3 text-secondary">限额：${item.minLimitPrice} - ${item.maxLimitPrice} RMB</div>
         </div>
       `
     }).join('')
   }
   $('.js-list').insertAdjacentHTML('beforeend', html)
 }
-loadList(2, 1, 1)

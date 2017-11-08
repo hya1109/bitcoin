@@ -31,3 +31,16 @@ $('.js-extract').addEventListener('click', () => {
     }
   })
 }, false)
+
+ajax({
+  url: `${BASE_URL}/api/account/info`,
+  success(data) {
+    render(data.data)
+  }
+})
+
+function render(data) {
+  $('.total span').innerHTML = `&#579;${(data.balance + data.freeze).toFixed(8).slice(0, 13)}`
+  $('.usable span').innerHTML = `&#579;${data.balance.toFixed(8).slice(0, 13)}`
+  $('.unusable span').innerHTML = `&#579;${data.freeze.toFixed(8)}`
+}

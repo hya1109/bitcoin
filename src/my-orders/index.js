@@ -1,10 +1,12 @@
-import { redirect, ajax, localParam, $, $$, BASE_URL, ORDER_STATUS, timeFormat } from '../js/util'
+import { redirect, ajax, localParam, $, $$, BASE_URL, ORDER_STATUS, ORDER_TYPE } from '../js/util'
 import pop from '../js/pop'
 import './index.less'
 
 let PAGE = 1
 let STATUS = 0
-const TYPE = localParam().search.type || 2
+const TYPE = localParam().search.type || ''
+
+loadList(TYPE, STATUS, 1)
 
 $('.js-tab').addEventListener('click', (e) => {
   if (!e.target.classList.contains('item')) return
@@ -34,7 +36,7 @@ $('.js-list').addEventListener('click', (e) => {
 
 function loadList(type, status, page = 1, pageSize = 15) {
   if (page === 1) {
-    $('.js-list').innerHTML = '加载中...'
+    $('.js-list').innerHTML = '<div style="padding-top: 10px;text-align: center;">加载中</div>'
   }
   ajax({
     url: `${BASE_URL}/api/order/list`,
@@ -51,33 +53,37 @@ function loadList(type, status, page = 1, pageSize = 15) {
         if (page === 1) {
           $('.js-list').innerHTML = ''
         }
-        if (data.data.currPage >= data.data.totalPage) {
-          $('.js-more').style.display = 'none'
-        } else {
+        // 没有更多列表
+        if (data.data.currPage < data.data.totalPage && data.data.list === pageSize) {
           $('.js-more').style.display = 'block'
+        } else {
+          $('.js-more').style.display = 'none'
         }
         $('.js-more').disabled = false
         $('.js-more').textContent = '加载更多'
-        renderList(data.data.list, type)
+        renderList(data.data.list)
       }
     }
   })
 }
 
-function renderList(list, type) {
+function renderList(list) {
   let html = ''
   if (!list.length) {
-    html = '<li class="list-group-item">暂无数据</li>'
+    html = '<div style="padding-top: 10px;text-align: center;">暂无数据</div>'
   } else {
     html = list.map((item) => {
       return `
         <div class="item" data-id="${item.id}">
           <div class="line-1">
-            <span>${type === 1 ? item.sellUserName : item.buyUserName}</span>
-            <span>${ORDER_STATUS[item.orderStatus]}</span>
+            <span class="name">
+              ${item.listShowName}
+              <span class="badge badge-success">${ORDER_TYPE[item.orderType]}</span>
+            </span>
+            <span style="font-size: 16px">${ORDER_STATUS[item.orderStatus]}</span>
           </div>
           <div class="line-2">
-            <span>交易金额：${item.orderMoney} CNY</span>
+            <span>交易金额：${item.orderMoney} RMB</span>
             <span>订单编号：${item.id}</span>
           </div>
         </div>
@@ -86,4 +92,3 @@ function renderList(list, type) {
   }
   $('.js-list').insertAdjacentHTML('beforeend', html)
 }
-loadList(2, 1, 1)
